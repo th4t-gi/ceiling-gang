@@ -1,8 +1,6 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 require('dotenv').config();
-const config = require("./config.json");
-
 
 client.on("ready", () => {
   console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
@@ -11,12 +9,12 @@ client.on("ready", () => {
 
 client.on("message", async message => {
   if (message.author.bot || 
-    !message.content.startsWith(config.prefix) || 
+    !message.content.startsWith(process.env.PREFIX) || 
     message.channel.id != process.env.CHANNELID) {
       return;
     }
 
-  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+  const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
   const sayMessage = args.join(' ');
 
