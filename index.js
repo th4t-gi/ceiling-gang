@@ -1,15 +1,13 @@
 const Discord = require("discord.js");
-const emoji = require('node-emoji')
 const request = require('request')
 const fs = require('fs')
+
+const config = require('./config.json')
 const client = new Discord.Client();
 
-const CONTRIBUTIONS_PATH = "/home/josh/Ceiling\ Gang/Contrib/"
-const DRAFTS_PATH = "/home/josh/Ceiling\ Gang/Drafts/"
-const BOT_TEST = '755455514925596682'
-const CEILING_GANG = '796798254619688991'
-const USERID = '571423688683945984'
+const BOT_TEST_CHANNEL = "755455514925596682"
 require('dotenv').config();
+let test_channel;
 
 client.on("ready", () => {
   console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
@@ -17,10 +15,10 @@ client.on("ready", () => {
 });
 
 client.on("message", async message => {
-  const bot_test_channel = message.guild.channels.cache.find(v => v.id === BOT_TEST.toString())
+  test_channel = message.guild.channels.cache.find(v => v.id === BOT_TEST_CHANNEL)
 
   //Channel that the bot is working in               \/
-  if (message.author.bot || message.channel.id != CEILING_GANG) return
+  if (message.author.bot || message.channel.id != config.channel) return
 
   const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
@@ -41,50 +39,52 @@ client.on("message", async message => {
     message.channel.send("Hey! There's a ceiling here! Awaiting download..")
     message.awaitReactions(filter, { max: 1, time: 24*60*60*1000, errors: ['time'] }).then(collected => {
       const reaction = collected.first();
-      message.react('✅')
       //download location depending on user reaction
       if (reaction.emoji.name === '👍') {
-        download(message, CONTRIBUTIONS_PATH, 'contributions')
+        download(message, config.contrib_path, 'contributions')
       } else if (reaction.emoji.name === '❓') {
-        download(message, DRAFTS_PATH, 'drafts')
-      }
+        download(message, config.draft_path, 'drafts')
+      } 
     })
     .catch(e => {
       //if the error is a timeout
       if (e instanceof Discord.Collection) {
         message.channel.send(`${message.url} has timed out`)
       }
-      console.log(e);
+      console.log("Error while waiting for a reaction:", e);
+      message.channel.send(`Uh Oh! Something went wrong. Logging to <#${BOT_TEST_CHANNEL}>`)
+      test_channel.send(`ERROR: \`\`\`${e}\`\`\``);
     });
   }
 })
 
 const download = (message, dir, folder) => {
   const att = message.attachments.first()
-  const bot_test_channel = message.guild.channels.cache.get(BOT_TEST)
 
   //cannot download image
   const ext = att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i)
   if (!ext.length) {
-    message.channel.send(`URL is not an image, logging to <#${BOT_TEST}>`)
-    bot_test_channel.channel.send(`ATTATCHMENT: \`\`\`${att}\`\`\``);
+    message.channel.send(`URL is not an image, logging to <#${BOT_TEST_CHANNEL}>`)
+    test_channel.channel.send(`ATTATCHMENT: \`\`\`${JSON.stringify(att)}\`\`\``);
     return
   }
 
   console.log('downoading');
-  const count = fs.readdirSync(dir).length+1
-  downloadImage(att.url, dir+'Contrib '+count+' - '+message.author.username+ext[0]).then(path => {
-    message.channel.send(`Ceiling has been downloaded to \`${folder}\` folder!`)
+  const count = fs.readdirSync(config.contrib_path).length + fs.readdirSync(config.draft_path).length +1
+  downloadImage(att.url, dir+'contrib'+count+'-'+message.author.username+ext[0]).then(path => {
+    // message.channel.send(`Ceiling has been downloaded to \`${folder}\` folder!`)
+    message.react('✅')
+
   }).catch(e => {
-    message.channel.send(`Uh Oh! Something went wrong. Logging to <#${BOT_TEST}>`)
-    bot_test_channel.send(`ERROR: \`\`\`${e}\`\`\``);
+    message.channel.send(`Uh Oh! Something went wrong. Logging to <#${BOT_TEST_CHANNEL}>`)
+    test_channel.send(`ERROR: \`\`\`${JSON.stringify(e)}\`\`\``);
   })
 }
 
 const filter = (reaction, user) => {
   console.log(reaction.emoji.name);
   //USER THAT THE BOT RESPONDS TO                                \/
-  return ['👍', '❓'].includes(reaction.emoji.name) && user.id == USERID;
+  return ['👍', '❓'].includes(reaction.emoji.name) && user.id == config.user;
 };
 
 async function downloadImage(uri, filename) {
@@ -96,3 +96,9 @@ async function downloadImage(uri, filename) {
 };
 
 client.login(process.env.TOKEN);
+
+
+//bot-test: 755455514925596682
+//ceiling-gang: 796798254619688991
+//Josh ID: 571423688683945984
+//Judd ID: 530987809180483584
