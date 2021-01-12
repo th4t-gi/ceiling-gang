@@ -44,7 +44,7 @@ client.on("message", async message => {
         download(message, config.contrib_path, 'contributions')
       } else if (reaction.emoji.name === '❓') {
         download(message, config.draft_path, 'drafts')
-      } 
+      }
     })
     .catch(e => {
       //if the error is a timeout
@@ -71,7 +71,7 @@ const download = (message, dir, folder) => {
 
   console.log('downoading');
   const count = fs.readdirSync(config.contrib_path).length + fs.readdirSync(config.draft_path).length +1
-  downloadImage(att.url, dir+'contrib'+count+'-'+message.author.username+ext[0]).then(path => {
+  downloadImage(att.url, dir+'Contrib '+count+' - '+message.author.username+ext[0]).then(path => {
     // message.channel.send(`Ceiling has been downloaded to \`${folder}\` folder!`)
     message.react('✅')
 
