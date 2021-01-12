@@ -4,23 +4,23 @@ const request = require('request')
 const fs = require('fs')
 const client = new Discord.Client();
 
-const CONTRIBUTIONS_PATH = "./contributions/"
-const DRAFTS_PATH = "./drafts/"
+const CONTRIBUTIONS_PATH = "/home/josh/Ceiling\ Gang/Contrib/"
+const DRAFTS_PATH = "/home/josh/Ceiling\ Gang/Drafts/"
 const BOT_TEST = '755455514925596682'
 const CEILING_GANG = '796798254619688991'
-const USERID = '530987809180483584'
+const USERID = '571423688683945984'
 require('dotenv').config();
 
 client.on("ready", () => {
   console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
-  client.user.setActivity(`Principle of this server`);
+  client.user.setActivity(`Collecting ceilings`);
 });
 
 client.on("message", async message => {
   const bot_test_channel = message.guild.channels.cache.find(v => v.id === BOT_TEST.toString())
 
   //Channel that the bot is working in               \/
-  if (message.author.bot || message.channel.id != BOT_TEST) return
+  if (message.author.bot || message.channel.id != CEILING_GANG) return
 
   const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
@@ -47,7 +47,7 @@ client.on("message", async message => {
         download(message, CONTRIBUTIONS_PATH, 'contributions')
       } else if (reaction.emoji.name === '❓') {
         download(message, DRAFTS_PATH, 'drafts')
-      } 
+      }
     })
     .catch(e => {
       //if the error is a timeout
@@ -64,7 +64,7 @@ const download = (message, dir, folder) => {
   const bot_test_channel = message.guild.channels.cache.get(BOT_TEST)
 
   //cannot download image
-  const ext = att.url.match(/\.(jpeg|jpg|gif|png|webp)$/)
+  const ext = att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i)
   if (!ext.length) {
     message.channel.send(`URL is not an image, logging to <#${BOT_TEST}>`)
     bot_test_channel.channel.send(`ATTATCHMENT: \`\`\`${att}\`\`\``);
@@ -73,7 +73,7 @@ const download = (message, dir, folder) => {
 
   console.log('downoading');
   const count = fs.readdirSync(dir).length+1
-  downloadImage(att.url, dir+'contrib'+count+'-'+message.author.username+ext[0]).then(path => {
+  downloadImage(att.url, dir+'Contrib '+count+' - '+message.author.username+ext[0]).then(path => {
     message.channel.send(`Ceiling has been downloaded to \`${folder}\` folder!`)
   }).catch(e => {
     message.channel.send(`Uh Oh! Something went wrong. Logging to <#${BOT_TEST}>`)
