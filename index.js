@@ -83,11 +83,7 @@ const download = (message, dir, folder) => {
 
     let size = (await getDirSize(config.contrib_path) + await getDirSize(config.draft_path))/ 1000000
     size = size.toFixed(2)
-    let int = getRandomInt(0, 5)
-    console.log(int);
-    if (!int) {
-      message.channel.send(`Thanks ${message.author.username}! We're now at ${size}MB with ${count} ceilings!`)
-    }
+    message.channel.send(`Thanks ${message.author.username}! We're now at ${size}MB with ${count} ceilings!`)
   }).catch(e => {
     message.channel.send(`Uh Oh! Something went wrong (downloadImage). Logging to <#${BOT_TEST_CHANNEL}>`)
     test_channel.send(`ERROR: \`\`\`${e}\`\`\``);
@@ -107,12 +103,6 @@ async function downloadImage(uri, filename) {
     }).on('error', reject);
   })
 };
-
-const getRandomInt = (min, max) => {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 
 
