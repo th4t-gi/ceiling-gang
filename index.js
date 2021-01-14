@@ -1,13 +1,19 @@
-const Discord = require("discord.js");
-const request = require('request')
-const fs = require('fs')
+import { Client, Collection } from "discord.js";
+import request from 'request';
+import * as fs from 'fs';
+import { promisify } from "util";
+import im from "imagemagick"
+import dotenv from 'dotenv'
+import getSize from "get-folder-size";
 
-const config = require('./config.json')
-const client = new Discord.Client();
+import config from './config.js';
+const client = new Client();
 
 const BOT_TEST_CHANNEL = "755455514925596682"
-require('dotenv').config();
+dotenv.config();
 let test_channel;
+
+let getDirSize = promisify(getSize)
 
 client.on("ready", () => {
   console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
@@ -48,11 +54,11 @@ client.on("message", async message => {
     })
     .catch(e => {
       //if the error is a timeout
-      if (e instanceof Discord.Collection) {
+      if (e instanceof Collection) {
         message.channel.send(`${message.url} has timed out`)
       }
       console.log("Error while waiting for a reaction:", e);
-      message.channel.send(`Uh Oh! Something went wrong. Logging to <#${BOT_TEST_CHANNEL}>`)
+      message.channel.send(`Uh Oh! Something went wrong (awaitReactions). Logging to <#${BOT_TEST_CHANNEL}>`)
       test_channel.send(`ERROR: \`\`\`${e}\`\`\``);
     });
   }
@@ -71,13 +77,20 @@ const download = (message, dir, folder) => {
 
   console.log('downoading');
   const count = fs.readdirSync(config.contrib_path).length + fs.readdirSync(config.draft_path).length +1
-  downloadImage(att.url, dir+'Contrib '+count+' - '+message.author.username+ext[0]).then(path => {
+  downloadImage(att.url, dir+'Contrib '+count+' - '+message.author.username+ext[0]).then(async path => {
     // message.channel.send(`Ceiling has been downloaded to \`${folder}\` folder!`)
     message.react('✅')
 
+    let size = (await getDirSize(config.contrib_path) + await getDirSize(config.draft_path))/ 1000000
+    size = size.toFixed(2)
+    let int = getRandomInt(0, 5)
+    console.log(int);
+    if (!int) {
+      message.channel.send(`Thanks ${message.author.username}! We're now at ${size}MB with ${count} ceilings!`)
+    }
   }).catch(e => {
-    message.channel.send(`Uh Oh! Something went wrong. Logging to <#${BOT_TEST_CHANNEL}>`)
-    test_channel.send(`ERROR: \`\`\`${JSON.stringify(e)}\`\`\``);
+    message.channel.send(`Uh Oh! Something went wrong (downloadImage). Logging to <#${BOT_TEST_CHANNEL}>`)
+    test_channel.send(`ERROR: \`\`\`${e}\`\`\``);
   })
 }
 
@@ -95,10 +108,12 @@ async function downloadImage(uri, filename) {
   })
 };
 
+const getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+
 client.login(process.env.TOKEN);
-
-
-//bot-test: 755455514925596682
-//ceiling-gang: 796798254619688991
-//Josh ID: 571423688683945984
-//Judd ID: 530987809180483584

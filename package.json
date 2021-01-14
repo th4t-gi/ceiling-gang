@@ -1,12 +1,12 @@
 {
   "name": "ceiling-gang",
-  "version": "0.0.3",
-  "description": "A digital",
+  "version": "0.0.4",
+  "description": "A digital bot to assist with collecting ceilings",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "keywords": [
     "discord",
@@ -15,10 +15,15 @@
   ],
   "author": "Judd Brau",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
+    "@types/get-folder-size": "^2.0.0",
+    "@types/imagemagick": "0.0.30",
     "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
     "exif": "^0.6.0",
+    "get-folder-size": "^2.0.1",
+    "imagemagick": "^0.1.3",
     "node-emoji": "^1.10.0",
     "request": "^2.88.2"
   }
