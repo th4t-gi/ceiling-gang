@@ -1,6 +1,6 @@
 {
   "name": "ceiling-gang",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A digital bot to assist with collecting ceilings",
   "main": "index.js",
   "scripts": {

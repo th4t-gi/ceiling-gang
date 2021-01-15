@@ -12,6 +12,7 @@ const client = new Client();
 const BOT_TEST_CHANNEL = "755455514925596682"
 dotenv.config();
 let test_channel;
+let messageMap = {}
 
 let getDirSize = promisify(getSize)
 
@@ -42,7 +43,10 @@ client.on("message", async message => {
 
   //if an image is sent in t
   if (message.attachments.array().length) {
-    message.channel.send("Hey! There's a ceiling here! Awaiting download..")
+    message.channel.send("Hey! There's a ceiling here! Awaiting download..").then(m => {
+      messageMap[message.id] = m
+    })
+    ;(await message.channel.messages.fetch()).first().dele
     message.awaitReactions(filter, { max: 1, time: 24*60*60*1000, errors: ['time'] }).then(collected => {
       const reaction = collected.first();
       //download location depending on user reaction
@@ -84,6 +88,17 @@ const download = (message, dir, folder) => {
     let size = (await getDirSize(config.contrib_path) + await getDirSize(config.draft_path))/ 1000000
     size = size.toFixed(2)
     message.channel.send(`Thanks ${message.author.username}! We're now at ${size}MB with ${count} ceilings!`)
+
+    console.log("delete");
+    message.delete().catch(e => {
+      console.log("Error while deleting message:", e);
+      message.channel.send(`Uh Oh! Something went wrong (delete). Logging to <#${BOT_TEST_CHANNEL}>`)
+      test_channel.send(`ERROR: \`\`\`${e}\`\`\``);
+    });
+    message.channel.messages.fetch(messageMap[message.id]).then(msg => {
+      msg.first().delete()
+    })
+
   }).catch(e => {
     message.channel.send(`Uh Oh! Something went wrong (downloadImage). Logging to <#${BOT_TEST_CHANNEL}>`)
     test_channel.send(`ERROR: \`\`\`${e}\`\`\``);
